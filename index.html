@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Smart Resource Booking</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+
+<body>
+
+    <header>
+
+        <div class="logo">
+            <h1>Smart Resource Booking</h1>
+            <p>Conflict Detection using Interval Tree</p>
+        </div>
+
+        <div class="header-date" id="currentDate"></div>
+
+    </header>
+
+
+    <div class="app">
+
+        <!-- Navigation -->
+        <nav>
+
+            <button class="nav-btn active" data-section="dashboard">
+                Dashboard
+            </button>
+
+            <button class="nav-btn" data-section="booking">
+                New Booking
+            </button>
+
+            <button class="nav-btn" data-section="schedule">
+                Schedule
+            </button>
+
+            <button class="nav-btn" data-section="bookings">
+                Bookings
+            </button>
+
+        </nav>
+
+
+        <main>
+
+            <!-- Dashboard -->
+            <section id="dashboard" class="section active-section">
+
+                <div class="page-title">
+                    <h2>Dashboard</h2>
+                    <p>Manage resource bookings and detect conflicts.</p>
+                </div>
+
+
+                <div class="stats">
+
+                    <div class="stat-card">
+                        <div class="stat-icon">R</div>
+                        <div>
+                            <h3 id="totalResources">4</h3>
+                            <p>Total Resources</p>
+                        </div>
+                    </div>
+
+
+                    <div class="stat-card">
+                        <div class="stat-icon">B</div>
+                        <div>
+                            <h3 id="totalBookings">0</h3>
+                            <p>Total Bookings</p>
+                        </div>
+                    </div>
+
+
+                    <div class="stat-card">
+                        <div class="stat-icon">C</div>
+                        <div>
+                            <h3 id="totalConflicts">0</h3>
+                            <p>Conflicts Detected</p>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="dashboard-grid">
+
+                    <div class="welcome-card">
+
+                        <h2>Resource Booking System</h2>
+
+                        <p>
+                            Book a resource for a specific time period.
+                            The system automatically checks existing
+                            bookings before confirming your request.
+                        </p>
+
+                        <button class="main-btn" id="goToBooking">
+                            Create New Booking
+                        </button>
+
+                        <button class="main-btn" onclick="loadExampleData()">
+                            Load Example Data
+                        </button>
+
+                    </div>
+
+
+                    <div class="today-card">
+
+                        <h3>Today's Bookings</h3>
+
+                        <div id="todayBookings">
+                            No bookings for today.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- New Booking -->
+            <section id="booking" class="section">
+
+                <div class="page-title">
+                    <h2>New Booking</h2>
+                    <p>Reserve a resource for a specific time.</p>
+                </div>
+
+
+                <div class="form-card">
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+
+                            <label>User Name</label>
+
+                            <input type="text" id="userName" placeholder="Enter user name">
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>Resource</label>
+
+                            <select id="resource">
+
+                                <option value="">
+                                    Select Resource
+                                </option>
+
+                                <option value="Computer Lab">
+                                    Computer Lab
+                                </option>
+
+                                <option value="Seminar Hall">
+                                    Seminar Hall
+                                </option>
+
+                                <option value="Conference Room">
+                                    Conference Room
+                                </option>
+
+                                <option value="Projector">
+                                    Projector
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+
+                            <label>Date</label>
+
+                            <input type="date" id="bookingDate">
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>Start Time</label>
+
+                            <input type="time" id="startTime">
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>End Time</label>
+
+                            <input type="time" id="endTime">
+
+                        </div>
+
+                    </div>
+
+
+                    <div id="message"></div>
+
+
+                    <button class="main-btn book-btn" onclick="addBooking()">
+
+                        Confirm Booking
+
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- Schedule -->
+            <section id="schedule" class="section">
+
+                <div class="page-title schedule-title">
+
+                    <div>
+                        <h2>Resource Schedule</h2>
+                        <p>View bookings by resource and time.</p>
+                    </div>
+
+                    <input type="date" id="scheduleDate">
+
+                </div>
+
+
+                <div class="schedule-card">
+
+                    <div class="schedule">
+
+                        <div class="schedule-header">
+
+                            <div class="resource-heading">
+                                Resource
+                            </div>
+
+                            <div class="time-heading">
+
+                                <span>08:00</span>
+                                <span>10:00</span>
+                                <span>12:00</span>
+                                <span>14:00</span>
+                                <span>16:00</span>
+                                <span>18:00</span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div id="scheduleRows"></div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- Bookings -->
+            <section id="bookings" class="section">
+
+                <div class="page-title">
+
+                    <h2>All Bookings</h2>
+
+                    <p>
+                        View and manage confirmed bookings.
+                    </p>
+
+                </div>
+
+
+                <div class="table-card">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>User</th>
+                                <th>Resource</th>
+                                <th>Date</th>
+                                <th>Start</th>
+                                <th>End</th>
+                                <th>Action</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="bookingTable"></tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+            <!-- Resources -->
+            <section id="resources" class="section">
+
+                <div class="page-title">
+
+                    <h2>Resources</h2>
+
+                    <p>
+                        Resources available for booking.
+                    </p>
+
+                </div>
+
+
+                <div class="resource-grid">
+
+                    <div class="resource-card">
+
+                        <div class="resource-icon">CL</div>
+
+                        <h3>Computer Lab</h3>
+
+                        <p>
+                            Computer laboratory for practical
+                            sessions and development work.
+                        </p>
+
+                        <span>Available for Booking</span>
+
+                    </div>
+
+
+                    <div class="resource-card">
+
+                        <div class="resource-icon">SH</div>
+
+                        <h3>Seminar Hall</h3>
+
+                        <p>
+                            Hall for seminars, presentations
+                            and academic events.
+                        </p>
+
+                        <span>Available for Booking</span>
+
+                    </div>
+
+
+                    <div class="resource-card">
+
+                        <div class="resource-icon">CR</div>
+
+                        <h3>Conference Room</h3>
+
+                        <p>
+                            Meeting room for discussions and
+                            group activities.
+                        </p>
+
+                        <span>Available for Booking</span>
+
+                    </div>
+
+
+                    <div class="resource-card">
+
+                        <div class="resource-icon">PR</div>
+
+                        <h3>Projector</h3>
+
+                        <p>
+                            Projector available for presentations
+                            and classroom activities.
+                        </p>
+
+                        <span>Available for Booking</span>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
